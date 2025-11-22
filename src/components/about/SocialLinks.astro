@@ -1,0 +1,59 @@
+---
+import { Icon } from 'astro-pure/user'
+import { Svg } from 'astro-pure/user'
+import { cn } from 'astro-pure/utils'
+
+interface Props {
+  links: {
+    name: string
+    url: string
+    icon?: string // 对应 astro-pure/user/Icon 支持的图标名
+    iconSvg?: Promise<typeof import('*.svg?raw')> | any // SVG 图标（类似 ToolSection）
+    color: string // Tailwind text color class, e.g. 'text-blue-500'
+    bgColor: string // Tailwind bg color class for hover, e.g. 'hover:bg-blue-500/10'
+    subtext?: string
+  }[]
+}
+
+const { links } = Astro.props
+
+// 判断是否为 SVG import
+function isSvgImport(obj: any): boolean {
+  return obj && typeof obj === 'object' && 'then' in obj
+}
+---
+
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3 not-prose">
+  {links.map((link) => (
+    <a
+      href={link.url}
+      target="_blank"
+      rel="noopener noreferrer"
+      class={cn(
+        "group flex flex-col gap-2 p-4 rounded-xl border bg-card transition-all duration-300 hover:-translate-y-1 hover:shadow-lg",
+        link.bgColor,
+        "hover:border-transparent"
+      )}
+    >
+      <div class="flex items-center justify-between">
+        <div class={cn("p-2 rounded-lg bg-muted/50 transition-colors group-hover:bg-white/20", link.color)}>
+          {link.iconSvg ? (
+            <Svg src={link.iconSvg} class="size-6" />
+          ) : link.icon ? (
+            <Icon name={link.icon as any} class="size-6" />
+          ) : null}
+        </div>
+        <div class="text-muted-foreground/50 -rotate-12 group-hover:rotate-0 transition-transform duration-300">
+           <span class="i-lucide-arrow-up-right text-xl opacity-0 group-hover:opacity-100 transition-opacity">↗</span>
+        </div>
+      </div>
+      
+      <div class="mt-2">
+        <h3 class="font-medium leading-none tracking-tight group-hover:text-foreground/90">{link.name}</h3>
+        {link.subtext && (
+          <p class="text-xs text-muted-foreground mt-1 group-hover:text-foreground/70">{link.subtext}</p>
+        )}
+      </div>
+    </a>
+  ))}
+</div>

@@ -1,0 +1,174 @@
+---
+import PageLayout from '@/layouts/CommonPage.astro'
+import { Button, Label } from 'astro-pure/user'
+
+const headings = [
+  { depth: 2, slug: 'doing', text: 'What I am doing now' },
+  { depth: 2, slug: 'activity', text: 'Activity' },
+]
+
+// Fetch GitHub events (Server-side)
+const githubUsername = 'IdealRein'
+let githubEvents = []
+let githubError = ''
+
+try {
+  const res = await fetch(`https://api.github.com/users/${githubUsername}/events?per_page=5`, {
+    headers: {
+      'User-Agent': 'astro-theme-pure-now-page'
+    }
+  })
+  if (res.ok) {
+    githubEvents = await res.json()
+  } else {
+    githubError = `Failed to fetch GitHub events: ${res.status}`
+  }
+} catch (e) {
+  githubError = 'Failed to connect to GitHub API'
+}
+
+// Format helper
+const formatDate = (dateStr: string) => {
+  return new Date(dateStr).toLocaleDateString('zh-CN', {
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  })
+}
+---
+
+<PageLayout title='Now' {headings}>
+  <p>This page is inspired by <a href="https://nownownow.com/about" target="_blank">Derek Sivers</a>. It's a snapshot of what I'm focused on at this point in my life.</p>
+  
+  <h2 id='doing'>What I am doing now</h2>
+  <div class='flex flex-col gap-y-4'>
+    <div class='border rounded-xl p-4 bg-muted/30'>
+      <div class='flex items-center gap-x-2 mb-2'>
+        <span class='relative flex h-3 w-3'>
+          <span class='animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75'></span>
+          <span class='relative inline-flex rounded-full h-3 w-3 bg-green-500'></span>
+        </span>
+        <h3 class='font-medium text-lg m-0'>Coding</h3>
+      </div>
+      <p class='text-muted-foreground'>Refactoring my blog theme and learning Astro deeply.</p>
+    </div>
+
+    <div class='border rounded-xl p-4 bg-muted/30'>
+      <div class='flex items-center gap-x-2 mb-2'>
+        <span class='relative flex h-3 w-3'>
+            <span class='relative inline-flex rounded-full h-3 w-3 bg-blue-500'></span>
+        </span>
+        <h3 class='font-medium text-lg m-0'>Life</h3>
+      </div>
+      <p class='text-muted-foreground'>Surviving graduate school in Tokyo.</p>
+    </div>
+  </div>
+
+  <h2 id='activity'>Activity</h2>
+  
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    {/* GitHub Activity (Dynamic) */}
+    <div class="col-span-1 md:col-span-2 border rounded-xl p-5">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-xl font-bold flex items-center gap-2">
+                <div class="i-mdi-github text-2xl"></div>
+                GitHub Activity
+            </h3>
+            <a href={`https://github.com/${githubUsername}`} target="_blank" class="text-xs text-muted-foreground hover:text-primary">View Profile -></a>
+        </div>
+        
+        {githubError ? (
+            <div class="text-red-500 text-sm">{githubError}</div>
+        ) : (
+            <div class="space-y-3">
+                {githubEvents.map((event: any) => (
+                    <div class="flex gap-3 text-sm">
+                        <div class="min-w-[4rem] text-xs text-muted-foreground pt-0.5">
+                            {formatDate(event.created_at)}
+                        </div>
+                        <div class="flex-1">
+                            <span class="font-medium text-primary">{event.type.replace('Event', '')}</span>
+                            <span class="text-muted-foreground mx-1">on</span>
+                            <a href={`https://github.com/${event.repo.name}`} target="_blank" class="hover:underline">{event.repo.name}</a>
+                        </div>
+                    </div>
+                ))}
+            </div>
+        )}
+    </div>
+
+    {/* Twitter / X */}
+    <div class="border rounded-xl p-5 overflow-hidden">
+        <h3 class="text-xl font-bold mb-4 flex items-center gap-2">
+            <div class="i-tabler-brand-x text-2xl"></div>
+            Twitter
+        </h3>
+        <div class="h-64 overflow-y-auto text-center flex flex-col items-center justify-center bg-muted/20 rounded-lg">
+            <p class="text-muted-foreground text-sm mb-2">Latest Tweets</p>
+            <a 
+                class="twitter-timeline" 
+                data-height="300" 
+                data-theme="dark"
+                href="https://twitter.com/Linxyc29300?ref_src=twsrc%5Etfw">
+                Tweets by Linxyc29300
+            </a> 
+            <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+        </div>
+    </div>
+
+    {/* Bangumi */}
+    <div class="border rounded-xl p-5">
+        <h3 class="text-xl font-bold mb-4 flex items-center gap-2">
+            <span class="text-pink-500">Bgm</span>
+            Bangumi
+        </h3>
+        <div class="space-y-2">
+            <p class="text-sm text-muted-foreground">Currently watching:</p>
+            <div class="flex items-center gap-3 p-2 bg-muted/20 rounded hover:bg-muted/40 transition cursor-pointer">
+                <div class="w-10 h-14 bg-gray-300 rounded flex-shrink-0 overflow-hidden">
+                    {/* Placeholder cover */}
+                    <div class="w-full h-full bg-primary/20"></div>
+                </div>
+                <div>
+                    <div class="font-medium">Girls Band Cry</div>
+                    <div class="text-xs text-muted-foreground">Ep. 8 / 13</div>
+                    <div class="w-full bg-gray-200 rounded-full h-1.5 mt-1 dark:bg-gray-700">
+                        <div class="bg-pink-500 h-1.5 rounded-full" style="width: 60%"></div>
+                    </div>
+                </div>
+            </div>
+             <div class="flex items-center gap-3 p-2 bg-muted/20 rounded hover:bg-muted/40 transition cursor-pointer">
+                <div class="w-10 h-14 bg-gray-300 rounded flex-shrink-0 overflow-hidden">
+                    <div class="w-full h-full bg-primary/20"></div>
+                </div>
+                <div>
+                    <div class="font-medium">Hibike! Euphonium 3</div>
+                    <div class="text-xs text-muted-foreground">Ep. 5 / 13</div>
+                    <div class="w-full bg-gray-200 rounded-full h-1.5 mt-1 dark:bg-gray-700">
+                        <div class="bg-yellow-500 h-1.5 rounded-full" style="width: 40%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="mt-4 text-center">
+            <Button href="https://bgm.tv/user/idealrein" target="_blank" class="w-full" variant="secondary">View Bangumi Profile</Button>
+        </div>
+    </div>
+
+    {/* QQ Zone / Others */}
+    <div class="border rounded-xl p-5">
+        <h3 class="text-xl font-bold mb-4">QQ Zone</h3>
+        <div class="flex items-center justify-center h-32 bg-muted/20 rounded-lg text-muted-foreground text-sm italic">
+           Syncing memories... (API Protected)
+        </div>
+        <div class="mt-4">
+             <p class="text-xs text-muted-foreground text-center">
+                Most recent updates are private.
+             </p>
+        </div>
+    </div>
+  </div>
+
+</PageLayout>
+
